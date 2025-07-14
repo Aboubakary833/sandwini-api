@@ -2,6 +2,14 @@
   "extends": "@adonisjs/tsconfig/tsconfig.app.json",
   "compilerOptions": {
     "rootDir": "./",
-    "outDir": "./build"
+    "outDir": "./build",
+    "lib": ["esnext"],
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "#utils/*": ["./app/utils/*.ts"],
+      "#actions/*": ["./app/actions/*.ts"],
+      "#rules/*": ["./app/rules/*.ts"]
+    }
   }
 }

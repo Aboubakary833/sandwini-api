@@ -9,12 +9,13 @@ const cacheConfig = defineConfig({
 
     default: store()
       .useL1Layer(drivers.memory())
-    
-      .useL2Layer(drivers.redis({
-        connectionName: 'main',
-      }))
-    
-  }
+
+      .useL2Layer(
+        drivers.redis({
+          connectionName: 'main',
+        })
+      ),
+  },
 })
 
 export default cacheConfig

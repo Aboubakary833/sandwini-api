@@ -6,10 +6,9 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('gen_random_uuid()').knexQuery)
-      table.uuid('role_id').unsigned().notNullable().references('roles.id').onDelete('CASCADE')
+      table.uuid('role_id').unsigned().nullable().references('roles.id').onDelete('CASCADE')
       table.uuid('service_id').unsigned().nullable().references('services.id').onDelete('CASCADE')
       table.string('name', 150).notNullable()
-      table.string('username', 175).notNullable()
       table.string('email', 254).notNullable()
       table.datetime('email_verified_at').nullable()
       table.string('password').notNullable()

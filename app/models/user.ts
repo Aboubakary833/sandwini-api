@@ -11,7 +11,7 @@ import History from './history.js'
 import Expense from './expense.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email', 'username'],
+  uids: ['email'],
   passwordColumnName: 'password',
 })
 
@@ -29,13 +29,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare name: string
 
   @column()
-  declare username: string
-
-  @column()
   declare email: string
 
   @column.dateTime()
-  declare emailVerifiedAt: DateTime|null
+  declare emailVerifiedAt: DateTime | null
 
   @column({ serializeAs: null })
   declare password: string
