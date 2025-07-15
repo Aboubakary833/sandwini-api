@@ -9,7 +9,8 @@
     "paths": {
       "#utils/*": ["./app/utils/*.ts"],
       "#actions/*": ["./app/actions/*.ts"],
-      "#rules/*": ["./app/rules/*.ts"]
+      "#rules/*": ["./app/rules/*.ts"],
+      "#messages/*": ["./app/messages/*.ts"],
     }
   }
 }

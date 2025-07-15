@@ -1,4 +1,3 @@
-import i18nManager from '@adonisjs/i18n/services/main'
 import vine from '@vinejs/vine'
 import { FieldContext } from '@vinejs/vine/types'
 
@@ -9,33 +8,35 @@ export type PasswordOptions = {
   hasSymbols?: boolean
 }
 
-const t = i18nManager.locale(i18nManager.defaultLocale).t
-
 const checkIfValueHasLowerCaseLetter = (value: string, field: FieldContext) => {
   const regExp = /[a-z]+/
   if (!regExp.test(value)) {
-    field.report(t('validator.password.lower'), 'password', field)
+    field.report('Le {{ field }} doit contenir au moins une lettre minuscule.', 'password', field)
+    return
   }
 }
 
 const checkIfValueHasUpperCaseLetter = (value: string, field: FieldContext) => {
   const regExp = /[A-Z]+/
   if (!regExp.test(value)) {
-    field.report(t('validator.password.upper'), 'password', field)
+    field.report('Le {{ field }} doit contenir au moins une lettre majuscule.', 'password', field)
+    return
   }
 }
 
 const checkIfValueHasDigit = (value: string, field: FieldContext) => {
   const regExp = /[0-9]+/
   if (!regExp.test(value)) {
-    field.report(t('validator.password.number'), 'password', field)
+    field.report('Le {{ field }} doit contenir au moins un chiffre.', 'password', field)
+    return
   }
 }
 
 const checkIfValueHasSymbols = (value: string, field: FieldContext) => {
   const regExp = /[#?!@$%^&*-_]+/
   if (!regExp.test(value)) {
-    field.report(t('validator.password.symbol'), 'password', field)
+    field.report('Le {{ field }} doit contenir au moins un symbole.', 'password', field)
+    return
   }
 }
 

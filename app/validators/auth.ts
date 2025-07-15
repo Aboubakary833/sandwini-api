@@ -19,7 +19,7 @@ export default class AuthValidator {
     vine.object({
       name: vine.string().trim().maxLength(150),
       email: vine.string().email().unique({ table: 'users', column: 'email' }),
-      password: vine.string().trim().password().confirmed(),
+      password: vine.string().password().confirmed(),
     })
   )
 }

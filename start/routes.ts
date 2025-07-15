@@ -5,4 +5,4 @@ router
   .group(() => {
     authRoutes()
   })
-  .prefix('v1')
+  .prefix('api/v1')

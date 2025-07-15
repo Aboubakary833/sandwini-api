@@ -24,14 +24,14 @@ async function exists(value: unknown, options: ExistsOptions, field: FieldContex
     return
   }
 
-  const row = (await db 
+  const row = (await db
     .from(options.table)
     .select(options.column)
     .where(options.column, value)
     .first()) as LucidRow
 
   if (!row) {
-    field.report("The given value does'nt exist.", 'exists', field)
+    field.report("La valeur fournie n'existe pas.", 'exists', field)
   }
 }
 

@@ -55,7 +55,6 @@ export default defineConfig({
     () => import('@adonisjs/mail/mail_provider'),
     () => import('@adonisjs/cache/cache_provider'),
     () => import('@adonisjs/core/providers/edge_provider'),
-    () => import('@adonisjs/i18n/i18n_provider'),
     () => import('@adonisjs/redis/redis_provider'),
   ],
 
@@ -67,7 +66,11 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [() => import('#start/routes'), () => import('#start/kernel')],
+  preloads: [
+    () => import('#start/routes'),
+    () => import('#start/kernel'),
+    () => import('#start/validator'),
+  ],
 
   /*
   |--------------------------------------------------------------------------

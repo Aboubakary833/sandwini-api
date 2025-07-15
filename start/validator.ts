@@ -1,8 +1,9 @@
-import { VineString } from '@vinejs/vine'
+import vine, { SimpleMessagesProvider, VineString } from '@vinejs/vine'
 import { uniqueRule, UniqueOptions } from '#rules/unique'
 import { existsRule, ExistsOptions } from '#rules/exists'
 import { PasswordOptions, passwordRule } from '#rules/password'
 import numericRule from '#rules/numeric'
+import { validatorFields, validatorMessages } from '#messages/validator'
 
 declare module '@vinejs/vine' {
   interface VineString {
@@ -28,3 +29,5 @@ VineString.macro('password', function (this: VineString, options?: PasswordOptio
 VineString.macro('numeric', function (this: VineString) {
   return this.use(numericRule())
 })
+
+vine.messagesProvider = new SimpleMessagesProvider(validatorMessages, validatorFields)

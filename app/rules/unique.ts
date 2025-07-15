@@ -34,7 +34,7 @@ async function unique(value: unknown, options: UniqueOptions, field: FieldContex
   if (options.except && row.id === options.except) return
 
   if (row) {
-    field.report('The {{ field }} field is not unique.', 'unique', field)
+    field.report('La valeur fournie est déjà prise.', 'unique', field)
   }
 }
 

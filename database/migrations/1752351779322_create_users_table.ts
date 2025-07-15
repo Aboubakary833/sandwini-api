@@ -9,12 +9,10 @@ export default class extends BaseSchema {
       table.uuid('role_id').unsigned().nullable().references('roles.id').onDelete('CASCADE')
       table.uuid('service_id').unsigned().nullable().references('services.id').onDelete('CASCADE')
       table.string('name', 150).notNullable()
-      table.string('email', 254).notNullable()
+      table.string('email', 254).notNullable().unique()
       table.datetime('email_verified_at').nullable()
       table.string('password').notNullable()
       table.boolean('active').defaultTo(false)
-
-      table.unique(['username', 'email'])
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

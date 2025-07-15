@@ -29,7 +29,10 @@
     "#database/*": "./database/*.js",
     "#start/*": "./start/*.js",
     "#tests/*": "./tests/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#actions/*": "./app/actions/*.js",
+    "#rules/*": "./app/rules/*.js",
+    "#messages/*": "./app/messages/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -55,7 +58,6 @@
     "@adonisjs/cache": "^1.2.0",
     "@adonisjs/core": "^6.18.0",
     "@adonisjs/cors": "^2.2.1",
-    "@adonisjs/i18n": "^2.2.1",
     "@adonisjs/lucid": "^21.6.1",
     "@adonisjs/mail": "^9.2.2",
     "@adonisjs/redis": "^9.2.0",
