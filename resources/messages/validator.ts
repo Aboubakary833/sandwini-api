@@ -9,6 +9,7 @@ export const validatorMessages = {
   'unique': 'La valeur fournie est déjà prise.',
   'exists': "Il n'existe aucune donnée correspondante à cette valeur.",
   'numeric': "La valeur fournie n'est pas une valeur numérique valide.",
+  'confirmed': 'Le champ {{ field }} doit être confirmer.',
 
   'email.unique': "L'adresse email fournie est déjà prise.",
   'email.exists': "Il n'existe aucune correspondante à cette adresse email.",
@@ -20,4 +21,5 @@ export const validatorFields = {
   email: 'addresse email',
   name: 'nom',
   password: 'mot de passe',
+  password_confirmation: 'Confirmer le mot de passe'
 }

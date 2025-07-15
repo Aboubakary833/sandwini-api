@@ -58,5 +58,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @hasMany(() => Expense)
   declare expenses: HasMany<typeof Expense>
 
+  async markEmailAsVerified() {
+    this.emailVerifiedAt = DateTime.now()
+    await this.save()
+  }
+
   static accessTokens = DbAccessTokensProvider.forModel(User)
 }

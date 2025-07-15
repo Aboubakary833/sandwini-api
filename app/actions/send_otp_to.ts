@@ -10,24 +10,28 @@ export enum OtpType {
 }
 
 export default class SendOtpTo {
-  private cache: CacheProvider
+  public type: OtpType
+  public cache: CacheProvider
+  public email: string
 
-  constructor() {
+  constructor(email: string, type: OtpType) {
+    this.email = email
+    this.type = type
     this.cache = cache.namespace('otp')
   }
 
-  async handle(email: string, type: OtpType) {
-    if (await this.cache.has({ key: email })) {
-      await this.cache.delete({ key: email })
+  async handle() {
+    if (await this.cache.has({ key: this.email })) {
+      await this.cache.delete({ key: this.email })
     }
     const otp = this.generateOTP()
-    const template = `email/otp/${type}`
+    const template = `emails/otp/${this.type}`
 
-    this.cache.set({ key: email, value: otp, ttl: '16m' })
+    await this.cache.set({ key: this.email, value: otp, ttl: '16m' })
 
     await mail.sendLater((message) => {
       message
-        .to(email)
+        .to(this.email)
         .from(env.get('SMTP_FROM_ADDRESS'))
         .subject('Verification')
         .htmlView(template, { otp })
