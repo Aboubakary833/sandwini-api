@@ -15,12 +15,13 @@ export default class RegisterController {
     const createResendOtpTokenAction = new CreateResendOtpToken(user.email, OtpType.REGISTER, '1d')
 
     await sendOtpAction.handle()
-    const resendOTPmailToken = createResendOtpTokenAction.handle()
+    const resendOTPmailToken = await createResendOtpTokenAction.handle()
 
     return response.ok({
       code: SUCCESS_CODES.ACCOUNT_CREATED,
       messages: authMessages.register.succeeded,
-      token: resendOTPmailToken,
+      resendOTPtoken: resendOTPmailToken,
+      redirectTo: '/register/verify',
     })
   }
 

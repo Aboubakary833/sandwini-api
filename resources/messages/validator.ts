@@ -15,6 +15,7 @@ export const validatorMessages = {
   'email.exists': "Il n'existe aucune correspondante à cette adresse email.",
   'password.minLength': "Le mot de passe doit être long d'au minimum {{ min }} caractères.",
   'password.maxLength': "Le mot de passe doit être long d'au maximum {{ max }} caractères.",
+  'otp.fixedLength': 'Ce champ doit être long de {{ length }} chiffres.',
 }
 
 export const validatorFields = {

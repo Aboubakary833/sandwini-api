@@ -14,12 +14,19 @@ export const authMessages = {
   },
 
   resendOTP: {
-    succeeded: "Un nouveau mail de vérification vous a été envoyé.",
-    sessionExpired: "Votre session a expiré.",
+    succeeded: 'Un nouveau mail de vérification vous a été envoyé.',
+    sessionExpired: 'Votre session a expiré.',
   },
 
   unauthorization: {
-    forbidden: "Vous ne pouvez éffectuer cette action étant connecté.",
-    verified: "Votre compte est actuellement vérifié.",
-  }
+    forbidden: 'Vous ne pouvez éffectuer cette action étant connecté.',
+    verified: 'Votre compte est actuellement vérifié.',
+  },
+
+  otpMailSubject: {
+    login: 'Vérification 2FA',
+    register: "Vérification de l'adresse email",
+    resetPasswordRequest: 'Réinitialisation du mot de passe',
+    passwordReset: 'Mot de passe réinitialisé',
+  },
 }

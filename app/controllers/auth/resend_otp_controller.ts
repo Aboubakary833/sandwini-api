@@ -31,7 +31,7 @@ export default class ResendOtpController {
       return response.gone(errorResponseBody)
     }
 
-    if ([OtpType.LOGIN, OtpType.REGISTER].includes(tokenPayload.type)) {
+    if (![OtpType.LOGIN, OtpType.REGISTER].includes(tokenPayload.type)) {
       errorResponseBody.code = ERROR_CODES.TOKEN_INVALID
       return response.gone(errorResponseBody)
     }

@@ -56,6 +56,7 @@ export default defineConfig({
     () => import('@adonisjs/cache/cache_provider'),
     () => import('@adonisjs/core/providers/edge_provider'),
     () => import('@adonisjs/redis/redis_provider'),
+    () => import('@adonisjs/limiter/limiter_provider')
   ],
 
   /*

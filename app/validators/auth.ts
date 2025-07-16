@@ -29,4 +29,11 @@ export default class AuthValidator {
       password: vine.string().minLength(8).maxLength(16).password().confirmed(),
     })
   )
+
+  static resetRequestSchema = vine.compile(
+    vine.object({
+      email: vine.string().email(),
+      password: vine.string().password().confirmed(),
+    })
+  )
 }

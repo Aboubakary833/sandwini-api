@@ -10,7 +10,7 @@
       "#utils/*": ["./app/utils/*.ts"],
       "#actions/*": ["./app/actions/*.ts"],
       "#rules/*": ["./app/rules/*.ts"],
-      "#messages/*": ["resources/messages/*.tss/*.ts"],
+      "#messages/*": ["./resources/messages/*.ts"],
     }
   }
 }

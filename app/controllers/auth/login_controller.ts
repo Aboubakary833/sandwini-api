@@ -46,8 +46,9 @@ export default class LoginController {
 
     return response.ok({
       code: SUCCESS_CODES.LOGIN_OTP_SENT,
-      resendOtpToken: token,
+      resendOTPtoken: token,
       message: authMessages.login.verify,
+      redirectTo: '/login/verify',
     })
   }
 
