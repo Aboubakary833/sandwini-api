@@ -2,14 +2,14 @@ import { ResendOtpTokenPayload } from '#actions/create_resend_opt_token'
 import SendOtpTo, { OtpType } from '#actions/send_otp_to'
 import { ERROR_CODES, ErrorCode, SUCCESS_CODES } from '#enums/status_codes'
 import { authMessages } from '#messages/auth'
-import AuthValidator from '#validators/auth'
+import { resendOtpValidator } from '#validators/auth'
 import cache from '@adonisjs/cache/services/main'
 import type { HttpContext } from '@adonisjs/core/http'
 import encryption from '@adonisjs/core/services/encryption'
 
 export default class ResendOtpController {
   async index({ request, response }: HttpContext) {
-    const { token, email } = await AuthValidator.resendOtpSchema.validate(request.all())
+    const { token, email } = await resendOtpValidator.validate(request.all())
     const cacheToken = await cache.namespace('token').get({ key: email })
     const errorResponseBody = {
       code: ERROR_CODES.RESEND_TOKEN_EXPIRED as ErrorCode,

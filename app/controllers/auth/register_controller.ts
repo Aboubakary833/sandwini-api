@@ -4,15 +4,17 @@ import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import { authMessages } from '#messages/auth'
 import User from '#models/user'
 import HistoryService from '#services/history_service'
-import AuthValidator from '#validators/auth'
+import { otpValidator, registerValidator } from '#validators/auth'
 import cache from '@adonisjs/cache/services/main'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 
+@inject()
 export default class RegisterController {
   constructor(protected historyService: HistoryService) {}
 
   async signup({ request, response }: HttpContext) {
-    const data = await AuthValidator.registerSchema.validate(request.all())
+    const data = await registerValidator.validate(request.all())
     const user = await User.create(data)
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.REGISTER)
@@ -30,7 +32,7 @@ export default class RegisterController {
   }
 
   async verify({ request, response }: HttpContext) {
-    const { email, otp } = await AuthValidator.otpSchema.validate(request.all())
+    const { email, otp } = await otpValidator.validate(request.all())
 
     const cacheOtp = await cache.namespace('otp').get({ key: email })
 
@@ -49,7 +51,7 @@ export default class RegisterController {
     }
 
     const user = await User.findByOrFail('email', email)
-    await user.markEmailAsVerified()
+    await Promise.all([user.markEmailAsVerified(), cache.namespace('otp').delete({ key: email })])
 
     return response.ok({
       code: SUCCESS_CODES.EMAIL_VERIFIED,

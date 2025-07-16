@@ -34,5 +34,5 @@ export default function authRoutes() {
     })
     .middleware(middleware.guest())
 
-  router.post('/logout', [SessionController, 'logout'])
+  router.post('/logout', [SessionController, 'logout']).middleware(middleware.auth())
 }

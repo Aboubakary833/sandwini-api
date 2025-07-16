@@ -4,17 +4,19 @@ import PasswordReset from '#mails/auth/password_reset'
 import { authMessages } from '#messages/auth'
 import User from '#models/user'
 import HistoryService from '#services/history_service'
-import AuthValidator from '#validators/auth'
+import { otpValidator, resetPasswordValidator } from '#validators/auth'
 import cache from '@adonisjs/cache/services/main'
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import hash from '@adonisjs/core/services/hash'
 import mail from '@adonisjs/mail/services/main'
 
+@inject()
 export default class PasswordResetController {
   constructor(protected historyService: HistoryService) {}
 
   async request({ request, response }: HttpContext) {
-    const { email, password } = await AuthValidator.resetRequestSchema.validate(request.all())
+    const { email, password } = await resetPasswordValidator.validate(request.all())
     const user = await User.findBy('email', email)
 
     const responseBody = {
@@ -29,9 +31,10 @@ export default class PasswordResetController {
 
     const resetCache = cache.namespace('reset_password')
     const sendOtpAction = new SendOtpTo(email, OtpType.RESET_PASSWORD_REQUEST)
+    const hasedPassword = await hash.make(password)
 
     await Promise.all([
-      resetCache.set({ key: email, value: hash.make(password), ttl: '30m' }),
+      resetCache.set({ key: email, value: hasedPassword, ttl: '30m' }),
       sendOtpAction.handle(),
     ])
 
@@ -39,7 +42,7 @@ export default class PasswordResetController {
   }
 
   async verify({ request, response }: HttpContext) {
-    const { email, otp } = await AuthValidator.otpSchema.validate(request.all())
+    const { email, otp } = await otpValidator.validate(request.all())
 
     const cacheOtp = await cache.namespace('otp').get<string>({ key: email })
     const cachePassword = await cache.namespace('reset_password').get<string>({ key: email })

@@ -2,18 +2,20 @@ import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
 import SendOtpTo, { OtpType } from '#actions/send_otp_to'
 import cache from '@adonisjs/cache/services/main'
-import AuthValidator from '#validators/auth'
+import { loginValidator, otpValidator } from '#validators/auth'
 import { authMessages } from '#messages/auth'
 import { serverErrorMessages } from '#messages/default'
 import CreateResendOtpToken from '#actions/create_resend_opt_token'
 import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import HistoryService from '#services/history_service'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class SessionController {
   constructor(protected historyService: HistoryService) {}
 
   async login({ request, response }: HttpContext) {
-    const { email, password } = await AuthValidator.loginSchema.validate(request.all())
+    const { email, password } = await loginValidator.validate(request.all())
     const user = await User.verifyCredentials(email, password)
     let sendOtpAction = new SendOtpTo(email, OtpType.LOGIN)
     let createResendOtpTokenAction = new CreateResendOtpToken(email, OtpType.LOGIN, '2h')
@@ -56,7 +58,7 @@ export default class SessionController {
   }
 
   async verify({ request, response }: HttpContext) {
-    const { email, otp } = await AuthValidator.otpSchema.validate(request.all())
+    const { email, otp } = await otpValidator.validate(request.all())
     const cacheOtp = await cache.namespace('otp').get({ key: email })
 
     if (!cacheOtp) {
