@@ -1,4 +1,4 @@
-import VerificationEmailNotification from '#mails/verification_email_notification'
+import VerificationEmail from '#mails/auth/verification_email'
 import { authMessages } from '#messages/auth'
 import cache from '@adonisjs/cache/services/main'
 import { CacheProvider } from '@adonisjs/cache/types'
@@ -9,7 +9,6 @@ export enum OtpType {
   LOGIN = 'login',
   REGISTER = 'register',
   RESET_PASSWORD_REQUEST = 'resetPasswordRequest',
-  PASSWORD_RESET = 'passwordReset',
 }
 
 export default class SendOtpTo {
@@ -33,10 +32,10 @@ export default class SendOtpTo {
 
     await this.cache.set({ key: this.email, value: otp, ttl: '16m' })
 
-    if ([OtpType.LOGIN, OtpType.REGISTER].includes(this.type)) {
-      await mail.sendLater(new VerificationEmailNotification(this.email, subject, otp, template))
+    if (this.type === OtpType.RESET_PASSWORD_REQUEST) {
+      await mail.send(new VerificationEmail(this.email, subject, otp, template))
     } else {
-      await mail.send(new VerificationEmailNotification(this.email, subject, otp, template))
+      await mail.sendLater(new VerificationEmail(this.email, subject, otp, template))
     }
   }
 

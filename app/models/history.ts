@@ -4,16 +4,17 @@ import User from './user.js'
 import { type BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export default class History extends BaseModel {
-
   static TYPE = {
-    LOGIN: "Connexion",
-    SIGN_UP: "Inscription",
-    CREATE: "Création",
-    EDIT: "Modification",
-    UPDATE: "Mise à jour",
-    DELETE: "Suppression",
-    EXPORT: "Export",
-    SYNC: "Synchronisation",
+    LOGIN: 'Connexion',
+    LOGOUT: 'Déconnexion',
+    REGISTER: 'Inscription',
+    RESET: 'Réinitialisation',
+    CREATE: 'Création',
+    EDIT: 'Modification',
+    UPDATE: 'Mise à jour',
+    DELETE: 'Suppression',
+    EXPORT: 'Export',
+    SYNC: 'Synchronisation',
   }
 
   @column({ isPrimary: true })

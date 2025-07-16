@@ -5,7 +5,6 @@ import { type BelongsTo } from '@adonisjs/lucid/types/relations'
 import Service from './service.js'
 
 export default class Expense extends BaseModel {
-
   static CATEGORY = {
     LOGISTICS: 'Logistique',
     STAFF: 'Staff',

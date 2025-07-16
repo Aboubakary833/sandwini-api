@@ -17,7 +17,7 @@ export default class Role extends BaseModel {
   declare updatedAt: DateTime
 
   @manyToMany(() => Permission, {
-    pivotTable: 'roles_has_permissions'
+    pivotTable: 'roles_has_permissions',
   })
   declare permissions: ManyToMany<typeof Permission>
 }

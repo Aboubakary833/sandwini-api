@@ -8,6 +8,11 @@ export const authMessages = {
     verify: 'Un code de vérification vous a été envoyé par mail.',
     inactive: "Votre compte n'a pas encore été activé par l'administrateur.",
   },
+
+  logout: {
+    succeeded: 'Vous avez été déconnecté.',
+  },
+
   register: {
     succeeded: 'Votre inscription a été un succès.',
     emailVerified: 'Votre compte a été vérifié.',
@@ -21,6 +26,12 @@ export const authMessages = {
   unauthorization: {
     forbidden: 'Vous ne pouvez éffectuer cette action étant connecté.',
     verified: 'Votre compte est actuellement vérifié.',
+  },
+
+  resetPassword: {
+    succeeded: 'Votre mot de passe a été changé. Veuillez vous connecter avec le nouveau.',
+    resetMailSent: 'Un email contenant un code vous a été envoyé.',
+    sessionExpired: 'Votre session a expiré.',
   },
 
   otpMailSubject: {

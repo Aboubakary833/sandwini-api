@@ -1,8 +1,9 @@
 import env from '#start/env'
 import { BaseMail } from '@adonisjs/mail'
 
-export default class VerificationEmailNotification extends BaseMail {
+export default class VerificationEmail extends BaseMail {
   subject: string
+  from: string
   email: string
   otp: string
   template: string
@@ -13,6 +14,7 @@ export default class VerificationEmailNotification extends BaseMail {
     this.email = email
     this.template = template
     this.subject = subject
+    this.from = env.get('SMTP_FROM_ADDRESS')
   }
 
   /**
@@ -20,10 +22,6 @@ export default class VerificationEmailNotification extends BaseMail {
    * the email is sent or queued.
    */
   prepare() {
-    this.message
-      .to(this.email)
-      .from(env.get('SMTP_FROM_ADDRESS'))
-      .subject(this.subject)
-      .htmlView(this.template, { otp: this.otp })
+    this.message.to(this.email).htmlView(this.template, { otp: this.otp })
   }
 }

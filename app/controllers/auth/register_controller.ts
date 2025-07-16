@@ -3,18 +3,22 @@ import SendOtpTo, { OtpType } from '#actions/send_otp_to'
 import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import { authMessages } from '#messages/auth'
 import User from '#models/user'
+import HistoryService from '#services/history_service'
 import AuthValidator from '#validators/auth'
 import cache from '@adonisjs/cache/services/main'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class RegisterController {
+  constructor(protected historyService: HistoryService) {}
+
   async signup({ request, response }: HttpContext) {
     const data = await AuthValidator.registerSchema.validate(request.all())
     const user = await User.create(data)
+
     const sendOtpAction = new SendOtpTo(user.email, OtpType.REGISTER)
     const createResendOtpTokenAction = new CreateResendOtpToken(user.email, OtpType.REGISTER, '1d')
 
-    await sendOtpAction.handle()
+    await Promise.all([this.historyService.saveRegisterAction(user), sendOtpAction.handle()])
     const resendOTPmailToken = await createResendOtpTokenAction.handle()
 
     return response.ok({
@@ -27,6 +31,7 @@ export default class RegisterController {
 
   async verify({ request, response }: HttpContext) {
     const { email, otp } = await AuthValidator.otpSchema.validate(request.all())
+
     const cacheOtp = await cache.namespace('otp').get({ key: email })
 
     if (!cacheOtp) {
@@ -43,8 +48,8 @@ export default class RegisterController {
       })
     }
 
-    const user = await User.query().where('email', email).firstOrFail()
-    user.markEmailAsVerified()
+    const user = await User.findByOrFail('email', email)
+    await user.markEmailAsVerified()
 
     return response.ok({
       code: SUCCESS_CODES.EMAIL_VERIFIED,

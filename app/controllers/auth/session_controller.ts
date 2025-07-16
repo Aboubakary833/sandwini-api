@@ -7,9 +7,12 @@ import { authMessages } from '#messages/auth'
 import { serverErrorMessages } from '#messages/default'
 import CreateResendOtpToken from '#actions/create_resend_opt_token'
 import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
+import HistoryService from '#services/history_service'
 
-export default class LoginController {
-  async attempt({ request, response }: HttpContext) {
+export default class SessionController {
+  constructor(protected historyService: HistoryService) {}
+
+  async login({ request, response }: HttpContext) {
     const { email, password } = await AuthValidator.loginSchema.validate(request.all())
     const user = await User.verifyCredentials(email, password)
     let sendOtpAction = new SendOtpTo(email, OtpType.LOGIN)
@@ -21,8 +24,7 @@ export default class LoginController {
       createResendOtpTokenAction.type = OtpType.REGISTER
       createResendOtpTokenAction.expireIn = '1d'
 
-      await sendOtpAction.handle()
-
+      await Promise.all([sendOtpAction.handle(), this.historyService.saveLoginAction(user, false)])
       const token = await createResendOtpTokenAction.handle()
 
       return response.unauthorized({
@@ -34,6 +36,8 @@ export default class LoginController {
     }
 
     if (!user.active) {
+      await this.historyService.saveLoginAction(user, false)
+
       return response.unauthorized({
         code: ERROR_CODES.ACCOUNT_DISABLED,
         message: authMessages.login.inactive,
@@ -41,7 +45,6 @@ export default class LoginController {
       })
     }
     await sendOtpAction.handle()
-
     const token = await createResendOtpTokenAction.handle()
 
     return response.ok({
@@ -69,24 +72,42 @@ export default class LoginController {
         message: authMessages.otp.invalid,
       })
     }
-    const user = await User.query().where('email', email).firstOrFail()
+    const user = await User.findByOrFail('email', email)
     const token = await User.accessTokens.create(user as User, [
       //abilities coming soon
     ])
 
     if (!token.value?.release()) {
+      await this.historyService.saveLoginAction(user, false)
+
       return response.badGateway({
         code: ERROR_CODES.INTERNAL_ERROR,
         message: serverErrorMessages.unexpected,
       })
     }
 
-    await cache.namespace('otp').delete({ key: email })
-    await cache.namespace('token').delete({ key: email })
+    await Promise.all([
+      cache.namespace('otp').delete({ key: email }),
+      cache.namespace('token').delete({ key: email }),
+    ])
+
+    await this.historyService.saveLoginAction(user, true)
 
     return response.ok({
       code: SUCCESS_CODES.LOGIN_SUCCESS,
       token: token.value.release(),
+      redirectTo: '/home',
+    })
+  }
+
+  async logout({ auth, response }: HttpContext) {
+    await this.historyService.saveLogoutAction(auth.user as User)
+    await auth.use('api').invalidateToken()
+
+    return response.ok({
+      code: SUCCESS_CODES.LOGOUT_SUCCESS,
+      message: authMessages.logout.succeeded,
+      redirectTo: '/login',
     })
   }
 }

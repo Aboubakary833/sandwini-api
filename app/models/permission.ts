@@ -8,7 +8,7 @@ export default class Permission extends BaseModel {
   declare id: string
 
   @column()
-  declare name:string
+  declare name: string
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -17,7 +17,7 @@ export default class Permission extends BaseModel {
   declare updatedAt: DateTime
 
   @manyToMany(() => Role, {
-    pivotTable: 'roles_has_permissions'
+    pivotTable: 'roles_has_permissions',
   })
   declare roles: ManyToMany<typeof Role>
 }

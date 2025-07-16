@@ -20,7 +20,7 @@ export default class Item extends BaseModel {
   declare unitPrice: number
 
   @column()
-  declare cover: string|null
+  declare cover: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
