@@ -3,6 +3,7 @@ import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import { errors as authErrors } from '@adonisjs/auth'
 import { errors as limiterErrors } from '@adonisjs/limiter'
 import { exceptionMessages } from '#messages/default'
+import { ERROR_CODES } from '#enums/status_codes'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -17,19 +18,25 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    */
   async handle(error: unknown, ctx: HttpContext) {
     if (error instanceof limiterErrors.E_TOO_MANY_REQUESTS) {
-      const message = exceptionMessages.rateLimitter
+      const responseBody = {
+        code: ERROR_CODES.TOO_MANY_REQUESTS,
+        message: exceptionMessages.rateLimitter,
+      }
       const headers = error.getDefaultHeaders()
 
       Object.keys(headers).forEach((header) => {
         ctx.response.header(header, headers[header])
       })
 
-      return ctx.response.status(error.status).send(message)
+      return ctx.response.status(error.status).send(responseBody)
     }
 
     if (error instanceof authErrors.E_INVALID_CREDENTIALS) {
       const message = exceptionMessages.invalidCredentials
-      ctx.response.status(400).send(message)
+      return ctx.response.status(400).send({
+        code: ERROR_CODES.INVALID_CREDENTIALS,
+        message,
+      })
     }
 
     return super.handle(error, ctx)

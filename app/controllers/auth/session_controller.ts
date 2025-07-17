@@ -75,6 +75,14 @@ export default class SessionController {
       })
     }
     const user = await User.findByOrFail('email', email)
+
+    if (!user.active) {
+      return response.unauthorized({
+        code: ERROR_CODES.ACCOUNT_DISABLED,
+        message: authMessages.login.inactive,
+        redirectTo: '/inactive',
+      })
+    }
     const token = await User.accessTokens.create(user as User, [
       //abilities coming soon
     ])

@@ -2,7 +2,7 @@ import vine from '@vinejs/vine'
 
 export const loginValidator = vine.compile(
   vine.object({
-    email: vine.string().email().exists({ table: 'users', column: 'email' }),
+    email: vine.string().email(),
     password: vine.string(),
   })
 )
