@@ -51,7 +51,11 @@ export default class RegisterController {
     }
 
     const user = await User.findByOrFail('email', email)
-    await Promise.all([user.markEmailAsVerified(), cache.namespace('otp').delete({ key: email })])
+    await Promise.all([
+      user.markEmailAsVerified(),
+      cache.namespace('otp').delete({ key: email }),
+      cache.namespace('token').delete({ key: email }),
+    ])
 
     return response.ok({
       code: SUCCESS_CODES.EMAIL_VERIFIED,

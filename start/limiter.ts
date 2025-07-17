@@ -16,16 +16,12 @@ export const throttle = limiter.define('global', () => {
 })
 
 export const apiThrottle = limiter.define('api', (ctx) => {
-  /**
-   * Allow logged-in users to make 100 requests by
-   * their user ID
-   */
   if (ctx.auth.user) {
-    return limiter.allowRequests(8).every('1 seconde').usingKey(`user_${ctx.auth.user.id}`)
+    return limiter.allowRequests(10).every('1 seconde').usingKey(`user_${ctx.auth.user.id}`)
   }
 
   /**
    * Allow guest users to make 10 requests by ip address
    */
-  return limiter.allowRequests(10).every('1 minute').usingKey(`ip_${ctx.request.ip()}`)
+  return limiter.allowRequests(60).every('1 minute').usingKey(`ip_${ctx.request.ip()}`)
 })

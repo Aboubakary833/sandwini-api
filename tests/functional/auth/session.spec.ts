@@ -58,6 +58,7 @@ test.group('Login attempt', () => {
       assert.equal(email.email, user.email)
       assert.equal(email.otp, code)
       assert.equal(email.subject, authMessages.otpMailSubject.register)
+      assert.equal(email.template, 'emails/otp/register')
 
       return true
     })
@@ -121,6 +122,7 @@ test.group('Login attempt', () => {
       assert.equal(email.email, user.email)
       assert.equal(email.otp, code)
       assert.equal(email.subject, authMessages.otpMailSubject.login)
+      assert.equal(email.template, 'emails/otp/login')
 
       return true
     })
