@@ -8,7 +8,7 @@ import { otpValidator, resetPasswordValidator } from '#validators/auth'
 import cache from '@adonisjs/cache/services/main'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import hash from '@adonisjs/core/services/hash'
+import encryption from '@adonisjs/core/services/encryption'
 import mail from '@adonisjs/mail/services/main'
 
 @inject()
@@ -31,7 +31,7 @@ export default class PasswordResetController {
 
     const resetCache = cache.namespace('reset_password')
     const sendOtpAction = new SendOtpTo(email, OtpType.RESET_PASSWORD_REQUEST)
-    const hasedPassword = await hash.make(password)
+    const hasedPassword = encryption.encrypt(password)
 
     await Promise.all([
       resetCache.set({ key: email, value: hasedPassword, ttl: '30m' }),
@@ -70,7 +70,16 @@ export default class PasswordResetController {
       })
     }
     const user = await User.findByOrFail('email', email)
-    user.password = cachePassword
+    const decryptedPassword = encryption.decrypt<string>(cachePassword)
+
+    if (!decryptedPassword) {
+      return response.gone({
+        code: ERROR_CODES.INTERNAL_ERROR,
+        message: authMessages.resetPassword.unexpected,
+        redirectTo: '/forgot_password',
+      })
+    }
+    user.password = decryptedPassword
 
     await Promise.all([
       user.save(),

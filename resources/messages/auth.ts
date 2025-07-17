@@ -32,6 +32,7 @@ export const authMessages = {
     succeeded: 'Votre mot de passe a été changé. Veuillez vous connecter avec le nouveau.',
     resetMailSent: 'Un email contenant un code vous a été envoyé.',
     sessionExpired: 'Votre session a expiré.',
+    unexpected: 'Une erreur inattendue est survenu. Veuillez reéssayer.',
   },
 
   otpMailSubject: {

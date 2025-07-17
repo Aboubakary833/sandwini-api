@@ -69,9 +69,7 @@ test.group('Registration', () => {
 
 test.group('Email verification', () => {
   test('Verification should fail and return OTP expired message', async ({ client }) => {
-    const user = await UserFactory.merge({
-      password: 'Marvel@1234',
-    }).create()
+    const user = await UserFactory.create()
 
     const response = await client.post('/api/v1/register/verify').json({
       email: user.email,
@@ -86,9 +84,7 @@ test.group('Email verification', () => {
   })
 
   test('Verification should fail and return OTP invalid message', async ({ client, cleanup }) => {
-    const user = await UserFactory.merge({
-      password: 'Marvel@1234',
-    }).create()
+    const user = await UserFactory.create()
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.REGISTER)
     const otpCacher = cache.namespace('otp')
@@ -116,16 +112,15 @@ test.group('Email verification', () => {
     }).create()
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.REGISTER)
-    const otpCacher = cache.namespace('otp')
     const code = sendOtpAction.generateOTP()
-    await otpCacher.set({ key: user.email, value: code, ttl: '15m' })
+    await cache.namespace('otp').set({ key: user.email, value: code, ttl: '15m' })
 
     const response = await client.post('/api/v1/register/verify').json({
       email: user.email,
       otp: code,
     })
 
-    user.refresh()
+    await user.refresh()
 
     response.assertOk()
     response.assertBodyContains({
