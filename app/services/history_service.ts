@@ -1,5 +1,6 @@
 import historyMessages from '#messages/history'
 import History from '#models/history'
+import Role from '#models/role'
 import User from '#models/user'
 
 export default class HistoryService {
@@ -33,6 +34,30 @@ export default class HistoryService {
       userId: user.id,
       type: History.TYPE.RESET,
       details: historyMessages.passwordReset,
+    })
+  }
+
+  async saveRoleCreationAction(user: User, role: Role) {
+    History.create({
+      userId: user.id,
+      type: History.TYPE.CREATE,
+      details: historyMessages.role.created.replace('{{ role }}', role.name),
+    })
+  }
+
+  async saveRoleUpdateAction(user: User, role: Role) {
+    History.create({
+      userId: user.id,
+      type: History.TYPE.UPDATE,
+      details: historyMessages.role.updated.replace('{{ role }}', role.name),
+    })
+  }
+
+  async savedeRoleDeleteAction(user: User, role: Role) {
+    History.create({
+      userId: user.id,
+      type: History.TYPE.DELETE,
+      details: historyMessages.role.deleted.replace('{{ role }}', role.name),
     })
   }
 }

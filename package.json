@@ -33,7 +33,8 @@
     "#actions/*": "./app/actions/*.js",
     "#rules/*": "./app/rules/*.js",
     "#messages/*": "./resources/messages/*.js",
-    "#enums/*": "./app/enums/*.js"
+    "#enums/*": "./app/enums/*.js",
+    "#utils/*": "./app/utils/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",

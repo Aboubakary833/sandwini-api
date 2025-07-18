@@ -31,7 +31,7 @@ async function unique(value: unknown, options: UniqueOptions, field: FieldContex
     .where(options.column, value)
     .first()) as LucidRow & { id: string }
 
-  if (options.except && row.id === options.except) return
+  if (options.except && row?.id === options.except) return
 
   if (row) {
     field.report('La valeur fournie est déjà prise.', 'unique', field)

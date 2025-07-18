@@ -4,6 +4,12 @@ import Permission from './permission.js'
 import { type ManyToMany } from '@adonisjs/lucid/types/relations'
 
 export default class Role extends BaseModel {
+  static DEFAULTS = {
+    ADMIN: 'Administrateur',
+    DIRECTOR: 'Gestionnaire',
+    MANAGER: 'Manager',
+  }
+
   @column({ isPrimary: true })
   declare id: string
 
