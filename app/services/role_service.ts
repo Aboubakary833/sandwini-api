@@ -5,4 +5,8 @@ export default class RoleService extends BaseFilterService {
   fetch() {
     return this.defaultQuery(Role)
   }
+
+  fetchAll() {
+    return Role.query().select(['id', 'name'])
+  }
 }

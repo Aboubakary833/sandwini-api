@@ -11,6 +11,12 @@ const historyMessages = {
 		created: 'Role "{{ role }}" créé.',
 		updated: 'Role "{{ role }}" modifié.',
 		deleted: 'Role {{ role }} supprimé.',
+	},
+
+	service: {
+		created: 'Service "{{ service }}" créé.',
+		updated: 'Service "{{ service }}" créé.',
+		deleted: 'Service "{{ service }}" créé.',
 	}
 }
 

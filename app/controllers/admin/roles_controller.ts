@@ -15,6 +15,14 @@ export default class RolesController {
     protected historyService: HistoryService
   ) {}
 
+  async all() {
+    const roles = await this.roleService.fetchAll()
+
+    return {
+      data: roles,
+    }
+  }
+
   async index() {
     const roles = await this.roleService.fetch()
 

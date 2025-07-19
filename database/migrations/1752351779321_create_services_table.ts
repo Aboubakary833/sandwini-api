@@ -13,6 +13,8 @@ export default class extends BaseSchema {
       table.integer('surface').notNullable()
       table.boolean('status').defaultTo(true)
 
+      table.unique(['email', 'phone'])
+
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })
