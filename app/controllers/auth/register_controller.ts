@@ -11,8 +11,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 @inject()
 export default class RegisterController {
-  constructor(protected historyService: HistoryService) {}
-
   async signup({ request, response }: HttpContext) {
     const data = await registerValidator.validate(request.all())
     const user = await User.create(data)
@@ -20,7 +18,7 @@ export default class RegisterController {
     const sendOtpAction = new SendOtpTo(user.email, OtpType.REGISTER)
     const createResendOtpTokenAction = new CreateResendOtpToken(user.email, OtpType.REGISTER, '1d')
 
-    await Promise.all([this.historyService.saveRegisterAction(user), sendOtpAction.handle()])
+    await Promise.all([HistoryService.log('user:register', user), sendOtpAction.handle()])
     const resendOTPmailToken = await createResendOtpTokenAction.handle()
 
     return response.ok({

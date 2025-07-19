@@ -10,10 +10,7 @@ import { HttpContext } from '@adonisjs/core/http'
 
 @inject()
 export default class RolesController {
-  constructor(
-    protected roleService: RoleService,
-    protected historyService: HistoryService
-  ) {}
+  constructor(protected roleService: RoleService) {}
 
   async all() {
     const roles = await this.roleService.fetchAll()
@@ -32,8 +29,9 @@ export default class RolesController {
   async store({ auth, request, response }: HttpContext) {
     const { name } = await storeValidator.validate(request.all())
     const role = await Role.create({ name })
+    const user = auth.user as User
 
-    await this.historyService.saveRoleCreationAction(auth.user as User, role)
+    await HistoryService.log('role:created', user, { role: role.name })
 
     return response.ok({
       code: SUCCESS_CODES.ROLE_CREATED,
@@ -50,11 +48,9 @@ export default class RolesController {
       })
     }
     const { name } = await updateValidator(role.id).validate(request.all())
+    const user = auth.user as User
     role.name = name
-    await Promise.all([
-      role.save(),
-      this.historyService.saveRoleUpdateAction(auth.user as User, role),
-    ])
+    await Promise.all([role.save(), HistoryService.log('role:edited', user, { role: name })])
 
     return response.ok({
       code: SUCCESS_CODES.ROLE_UPDATED,
@@ -71,7 +67,7 @@ export default class RolesController {
       })
     }
     await Promise.all([
-      this.historyService.savedeRoleDeleteAction(auth.user as User, role),
+      HistoryService.log('role:deleted', auth.user as User, { role: role.name }),
       role.delete(),
     ])
 

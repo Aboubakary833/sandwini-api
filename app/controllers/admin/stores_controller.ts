@@ -31,7 +31,7 @@ export default class StoreController {
     const service = await Service.create(formData)
     const user = auth.user as User
 
-    await this.historyService.saveServiceCreateAction(user, service)
+    await HistoryService.log('service:created', user, { service: service.name })
 
     return response.ok({
       code: SUCCESS_CODES.SERVICE_CREATED,
@@ -55,7 +55,7 @@ export default class StoreController {
 
     await Promise.all([
       service.merge(formData).save(),
-      this.historyService.saveServiceUpdateAction(user, service),
+      HistoryService.log('service:edited', user, { service: formData.name }),
     ])
 
     return response.ok({
@@ -66,7 +66,7 @@ export default class StoreController {
   /**
    * Delete record
    */
-  async destroy({ params, response }: HttpContext) {
+  async destroy({ auth, params, response }: HttpContext) {
     const service = await Service.find(params.id)
     if (!service) {
       return response.gone({
@@ -74,8 +74,12 @@ export default class StoreController {
         message: serviceMessages.notFound,
       })
     }
+    const user = auth.user as User
 
-    await service.delete()
+    await Promise.all([
+      HistoryService.log('service:deleted', user, { service: service.name }),
+      service.delete(),
+    ])
 
     return response.ok({
       code: SUCCESS_CODES.SERVICE_DELETED,

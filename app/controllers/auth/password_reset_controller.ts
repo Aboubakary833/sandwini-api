@@ -13,8 +13,6 @@ import mail from '@adonisjs/mail/services/main'
 
 @inject()
 export default class PasswordResetController {
-  constructor(protected historyService: HistoryService) {}
-
   async request({ request, response }: HttpContext) {
     const { email, password } = await resetPasswordValidator.validate(request.all())
     const user = await User.findBy('email', email)
@@ -86,7 +84,7 @@ export default class PasswordResetController {
       cache.namespace('otp').delete({ key: email }),
       cache.namespace('reset_password').delete({ key: email }),
       mail.send(new PasswordReset(email)),
-      this.historyService.savePasswordResetAction(user),
+      HistoryService.log('user:reset', user),
     ])
 
     return response.ok({

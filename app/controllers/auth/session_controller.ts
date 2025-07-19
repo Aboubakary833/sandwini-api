@@ -12,8 +12,6 @@ import { inject } from '@adonisjs/core'
 
 @inject()
 export default class SessionController {
-  constructor(protected historyService: HistoryService) {}
-
   async login({ request, response }: HttpContext) {
     const { email, password } = await loginValidator.validate(request.all())
     const user = await User.verifyCredentials(email, password)
@@ -26,7 +24,7 @@ export default class SessionController {
       createResendOtpTokenAction.type = OtpType.REGISTER
       createResendOtpTokenAction.expireIn = '1d'
 
-      await Promise.all([sendOtpAction.handle(), this.historyService.saveLoginAction(user, false)])
+      await Promise.all([sendOtpAction.handle(), HistoryService.log('user:login_failed', user)])
       const token = await createResendOtpTokenAction.handle()
 
       return response.unauthorized({
@@ -38,7 +36,7 @@ export default class SessionController {
     }
 
     if (!user.active) {
-      await this.historyService.saveLoginAction(user, false)
+      await HistoryService.log('user:login_failed', user)
 
       return response.unauthorized({
         code: ERROR_CODES.ACCOUNT_DISABLED,
@@ -88,7 +86,7 @@ export default class SessionController {
     ])
 
     if (!token.value?.release()) {
-      await this.historyService.saveLoginAction(user, false)
+      await HistoryService.log('user:login_failed', user)
 
       return response.badGateway({
         code: ERROR_CODES.INTERNAL_ERROR,
@@ -99,9 +97,8 @@ export default class SessionController {
     await Promise.all([
       cache.namespace('otp').delete({ key: email }),
       cache.namespace('token').delete({ key: email }),
+      HistoryService.log('user:login_succeeded', user),
     ])
-
-    await this.historyService.saveLoginAction(user, true)
 
     return response.ok({
       code: SUCCESS_CODES.LOGIN_SUCCESS,
@@ -111,8 +108,10 @@ export default class SessionController {
   }
 
   async logout({ auth, response }: HttpContext) {
-    await this.historyService.saveLogoutAction(auth.user as User)
-    await auth.use('api').invalidateToken()
+    await Promise.all([
+      HistoryService.log('user:logout', auth.user as User),
+      auth.use('api').invalidateToken(),
+    ])
 
     return response.ok({
       code: SUCCESS_CODES.LOGOUT_SUCCESS,

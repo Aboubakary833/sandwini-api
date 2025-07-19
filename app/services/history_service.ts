@@ -1,88 +1,35 @@
-import historyMessages from '#messages/history'
+// app/services/history_service.ts
+
 import History from '#models/history'
-import Role from '#models/role'
-import Service from '#models/service'
-import User from '#models/user'
+import messages from '#messages/history'
+import type User from '#models/user'
 
 export default class HistoryService {
-  async saveLoginAction(user: User, succeeded: boolean) {
-    const messages = historyMessages.login
-    History.create({
+  static async log(type: keyof typeof messages, user: User, data: Record<string, any> = {}) {
+    const template = messages[type]
+
+    const details = template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => {
+      return data[key] ?? ''
+    })
+
+    const baseType = type.split(':')[1]
+    const key = HistoryService.getTypeKey(baseType)
+
+    await History.create({
       userId: user.id,
-      type: History.TYPE.LOGIN,
-      details: succeeded ? messages.succeeded : messages.failed,
+      type: History.TYPE[key],
+      details,
     })
   }
 
-  async saveLogoutAction(user: User) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.LOGOUT,
-      details: historyMessages.logout,
-    })
-  }
+  static getTypeKey(dirtyType: string) {
+    if (Object.keys(History.TYPE).includes(dirtyType.toUpperCase())) {
+      return dirtyType.toUpperCase() as keyof typeof History.TYPE
+    }
 
-  async saveRegisterAction(user: User) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.REGISTER,
-      details: historyMessages.register,
-    })
-  }
-
-  async savePasswordResetAction(user: User) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.RESET,
-      details: historyMessages.passwordReset,
-    })
-  }
-
-  async saveRoleCreationAction(user: User, role: Role) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.CREATE,
-      details: historyMessages.role.created.replace('{{ role }}', role.name),
-    })
-  }
-
-  async saveRoleUpdateAction(user: User, role: Role) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.UPDATE,
-      details: historyMessages.role.updated.replace('{{ role }}', role.name),
-    })
-  }
-
-  async savedeRoleDeleteAction(user: User, role: Role) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.DELETE,
-      details: historyMessages.role.deleted.replace('{{ role }}', role.name),
-    })
-  }
-
-  async saveServiceCreateAction(user: User, service: Service) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.CREATE,
-      details: historyMessages.service.created.replace('{{ service }}', service.name),
-    })
-  }
-
-  async saveServiceUpdateAction(user: User, service: Service) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.UPDATE,
-      details: historyMessages.service.updated.replace('{{ service }}', service.name),
-    })
-  }
-
-  async saveServiceDeleteAction(user: User, service: Service) {
-    History.create({
-      userId: user.id,
-      type: History.TYPE.DELETE,
-      details: historyMessages.service.deleted.replace('{{ service }}', service.name),
-    })
+    if (dirtyType.endsWith('succeeded') || dirtyType.endsWith('failed')) {
+      dirtyType = dirtyType.replaceAll(/_succeeded|_failed/g, '')
+    }
+    return dirtyType.slice(0, -1).toUpperCase() as keyof typeof History.TYPE
   }
 }
