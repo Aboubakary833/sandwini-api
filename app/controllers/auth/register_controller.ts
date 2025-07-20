@@ -1,8 +1,8 @@
-import CreateResendOtpToken from '#actions/create_resend_opt_token'
-import SendOtpTo, { OtpType } from '#actions/send_otp_to'
+import { OtpType } from '#actions/send_otp_to'
 import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import { authMessages } from '#messages/auth'
 import User from '#models/user'
+import AuthService from '#services/auth_service'
 import CacheService from '#services/cache_service'
 import HistoryService from '#services/history_service'
 import { otpValidator, registerValidator } from '#validators/auth'
@@ -14,12 +14,19 @@ const REDIRECTS = {
   afterVerification: '/inactive',
 }
 
+@inject()
 export default class RegisterController {
+  constructor(private authService: AuthService) {}
+
   async signup({ request, response }: HttpContext) {
     const data = await registerValidator.validate(request.all())
     const user = await User.create(data)
 
-    const otpToken = await this.sendOtpAndCreateToken(user.email, OtpType.REGISTER, '1d')
+    const otpToken = await this.authService.sendOtpAndCreateResendToken(
+      user,
+      OtpType.REGISTER,
+      '1d'
+    )
 
     await HistoryService.log('user:register', user)
 
@@ -49,27 +56,15 @@ export default class RegisterController {
         message: authMessages.otp.invalid,
       })
     }
-
     const user = await User.findByOrFail('email', email)
 
-    await Promise.all([
-      user.markEmailAsVerified(),
-      cache.from('otp').delete(email),
-      cache.from('token').delete(email),
-    ])
+    await user.markEmailAsVerified()
+    this.authService.handleCachesDeletionFor(email)
 
     return response.ok({
       code: SUCCESS_CODES.EMAIL_VERIFIED,
       message: authMessages.register.emailVerified,
       redirectTo: REDIRECTS.afterVerification,
     })
-  }
-
-  private async sendOtpAndCreateToken(email: string, type: OtpType, expire: string) {
-    const otpSender = new SendOtpTo(email, type)
-    const tokenCreator = new CreateResendOtpToken(email, type, expire)
-
-    await otpSender.handle()
-    return tokenCreator.handle()
   }
 }

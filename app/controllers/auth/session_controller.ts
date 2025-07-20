@@ -1,7 +1,6 @@
 import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
-import SendOtpTo, { OtpType } from '#actions/send_otp_to'
-import CreateResendOtpToken from '#actions/create_resend_opt_token'
+import { OtpType } from '#actions/send_otp_to'
 import { loginValidator, otpValidator } from '#validators/auth'
 import { authMessages } from '#messages/auth'
 import { serverErrorMessages } from '#messages/default'
@@ -9,6 +8,7 @@ import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import HistoryService from '#services/history_service'
 import CacheService from '#services/cache_service'
 import { inject } from '@adonisjs/core'
+import AuthService from '#services/auth_service'
 
 const REDIRECTS = {
   verifyEmail: '/email/verify',
@@ -18,7 +18,10 @@ const REDIRECTS = {
   home: '/home',
 }
 
+@inject()
 export default class SessionController {
+  constructor(private authService: AuthService) {}
+
   async login({ request, response }: HttpContext) {
     const { email, password } = await loginValidator.validate(request.all())
 
@@ -33,7 +36,7 @@ export default class SessionController {
     }
 
     if (!user.emailVerifiedAt) {
-      return this.handleUnverifiedUser(user, response)
+      return this.authService.handleUnverifiedUser(user, response)
     }
 
     if (!user.active) {
@@ -46,7 +49,7 @@ export default class SessionController {
       })
     }
 
-    const token = await this.sendOtpAndCreateToken(user, OtpType.LOGIN, '2h')
+    const token = await this.authService.sendOtpAndCreateResendToken(user, OtpType.LOGIN, '2h')
 
     return response.ok({
       code: SUCCESS_CODES.LOGIN_OTP_SENT,
@@ -84,11 +87,9 @@ export default class SessionController {
         redirectTo: REDIRECTS.inactive,
       })
     }
+    const token = await this.authService.createAccessTokenFor(user)
 
-    const token = await User.accessTokens.create(user, [])
-    const tokenValue = token.value?.release()
-
-    if (!tokenValue) {
+    if (!token) {
       await HistoryService.log('user:login_failed', user)
 
       return response.badGateway({
@@ -96,16 +97,18 @@ export default class SessionController {
         message: serverErrorMessages.unexpected,
       })
     }
-
-    await Promise.all([
+    Promise.all([
+      user.markEmailAsVerified(),
       cache.from('otp').delete(email),
       cache.from('token').delete(email),
-      HistoryService.log('user:login_succeeded', user),
     ])
+
+    this.authService.handleCachesDeletionFor(email)
+    await HistoryService.log('user:login_succeeded', user)
 
     return response.ok({
       code: SUCCESS_CODES.LOGIN_SUCCESS,
-      token: tokenValue,
+      token: token,
       redirectTo: REDIRECTS.home,
     })
   }
@@ -120,29 +123,5 @@ export default class SessionController {
       message: authMessages.logout.succeeded,
       redirectTo: REDIRECTS.login,
     })
-  }
-
-  private async handleUnverifiedUser(user: User, response: HttpContext['response']) {
-    const otpSender = new SendOtpTo(user.email, OtpType.REGISTER)
-    const tokenCreator = new CreateResendOtpToken(user.email, OtpType.REGISTER, '1d')
-
-    await Promise.all([otpSender.handle(), HistoryService.log('user:login_failed', user)])
-
-    const token = await tokenCreator.handle()
-
-    return response.unauthorized({
-      code: ERROR_CODES.EMAIL_NOT_VERIFIED,
-      message: authMessages.login.emailNotVerified,
-      resendOtpToken: token,
-      redirectTo: REDIRECTS.verifyEmail,
-    })
-  }
-
-  private async sendOtpAndCreateToken(user: User, type: OtpType, expire: string) {
-    const otpSender = new SendOtpTo(user.email, type)
-    const tokenCreator = new CreateResendOtpToken(user.email, type, expire)
-
-    await otpSender.handle()
-    return tokenCreator.handle()
   }
 }
