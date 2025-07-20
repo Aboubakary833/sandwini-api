@@ -1,5 +1,3 @@
-// app/services/history_service.ts
-
 import History from '#models/history'
 import messages from '#messages/history'
 import type User from '#models/user'
@@ -28,7 +26,7 @@ export default class HistoryService {
     }
 
     if (dirtyType.endsWith('succeeded') || dirtyType.endsWith('failed')) {
-      dirtyType = dirtyType.replaceAll(/_succeeded|_failed/g, '')
+      dirtyType = dirtyType.replaceAll(/succeeded|failed/g, '')
     }
     return dirtyType.slice(0, -1).toUpperCase() as keyof typeof History.TYPE
   }

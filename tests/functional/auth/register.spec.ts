@@ -4,7 +4,7 @@ import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import VerificationEmail from '#mails/auth/verification_email'
 import { authMessages } from '#messages/auth'
 import { validatorMessages } from '#messages/validator'
-import cache from '@adonisjs/cache/services/main'
+import CacheService from '#services/cache_service'
 import mail from '@adonisjs/mail/services/main'
 import { test } from '@japa/runner'
 
@@ -45,8 +45,9 @@ test.group('Registration', () => {
       password_confirmation: 'John@wicked14',
     })
 
-    const code = await cache.namespace('otp').get<string>({ key: email })
-    const token = await cache.namespace('token').get<string>({ key: email })
+    const cache = new CacheService()
+    const code = await cache.from('otp').get<string>(email)
+    const token = await cache.from('token').get<string>(email)
     mails.assertQueued(VerificationEmail, (message) => {
       assert.equal(message.email, email)
       assert.equal(message.otp, code)
@@ -87,8 +88,8 @@ test.group('Email verification', () => {
     const user = await UserFactory.create()
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.REGISTER)
-    const otpCacher = cache.namespace('otp')
-    await otpCacher.set({ key: user.email, value: sendOtpAction.generateOTP(), ttl: '15m' })
+    const cache = new CacheService().namespace('otp')
+    await cache.set(user.email, sendOtpAction.generateOTP(), '15m')
 
     const response = await client.post('/api/v1/register/verify').json({
       email: user.email,
@@ -102,7 +103,7 @@ test.group('Email verification', () => {
     })
 
     cleanup(async () => {
-      await otpCacher.delete({ key: user.email })
+      await cache.delete(user.email)
     })
   })
 
@@ -113,7 +114,7 @@ test.group('Email verification', () => {
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.REGISTER)
     const code = sendOtpAction.generateOTP()
-    await cache.namespace('otp').set({ key: user.email, value: code, ttl: '15m' })
+    await new CacheService().to('otp').set(user.email, code, '15m')
 
     const response = await client.post('/api/v1/register/verify').json({
       email: user.email,

@@ -7,7 +7,7 @@ export default {
   'role:created': 'Rôle {{ role }} créé',
   'role:edited': 'Rôle {{ role }} modifié',
   'role:deleted': 'Rôle {{ role }} supprimé',
-  'service:created': 'Service {{ service }} créé',
-  'service:edited': 'Service {{ service }} modifié',
-  'service:deleted': 'Service {{ service }} supprimé',
+  'service:created': 'Dépôt {{ service }} créé',
+  'service:edited': 'Dépôt {{ service }} modifié',
+  'service:deleted': 'Dépôt {{ service }} supprimé',
 } satisfies Record<string, string>

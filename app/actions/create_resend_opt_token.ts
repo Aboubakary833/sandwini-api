@@ -1,6 +1,5 @@
-import { CacheProvider } from '@adonisjs/cache/types'
+import CachService from '#services/cache_service'
 import { OtpType } from './send_otp_to.ts'
-import cache from '@adonisjs/cache/services/main'
 import encryption from '@adonisjs/core/services/encryption'
 
 export type ResendOtpTokenPayload = {
@@ -9,7 +8,7 @@ export type ResendOtpTokenPayload = {
 }
 
 export default class CreateResendOtpToken {
-  private cache: CacheProvider
+  private cache: CachService
   public email: string
   public type: OtpType
   public expireIn: string | number
@@ -18,18 +17,18 @@ export default class CreateResendOtpToken {
     this.email = email
     this.type = type
     this.expireIn = expireIn
-    this.cache = cache.namespace('token')
+    this.cache = new CachService().namespace('token')
   }
 
   async handle(): Promise<string> {
-    let token = await this.cache.get<string>({ key: this.email })
+    let token = await this.cache.get<string>(this.email)
     if (!token) {
       token = encryption.encrypt({
         type: this.type,
         email: this.email,
       })
 
-      await this.cache.set({ key: this.email, value: token, ttl: this.expireIn })
+      await this.cache.set(this.email, token, this.expireIn)
     }
 
     return token

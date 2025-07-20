@@ -1,7 +1,6 @@
 import VerificationEmail from '#mails/auth/verification_email'
 import { authMessages } from '#messages/auth'
-import cache from '@adonisjs/cache/services/main'
-import { CacheProvider } from '@adonisjs/cache/types'
+import CachService from '#services/cache_service'
 import mail from '@adonisjs/mail/services/main'
 import { randomBytes, createHash } from 'node:crypto'
 
@@ -13,24 +12,23 @@ export enum OtpType {
 
 export default class SendOtpTo {
   public type: OtpType
-  public cache: CacheProvider
+  public cache: CachService
   public email: string
 
   constructor(email: string, type: OtpType) {
     this.email = email
     this.type = type
-    this.cache = cache.namespace('otp')
+    this.cache = new CachService().namespace('otp')
   }
 
   async handle() {
-    if (await this.cache.has({ key: this.email })) {
-      await this.cache.delete({ key: this.email })
-    }
+    await this.cache.deleteIfExists(this.email)
+
     const subject = authMessages.otpMailSubject[this.type]
     const otp = this.generateOTP()
     const template = `emails/otp/${this.type}`
 
-    await this.cache.set({ key: this.email, value: otp, ttl: '16m' })
+    await this.cache.set(this.email, otp, '16m')
 
     if (this.type === OtpType.RESET_PASSWORD_REQUEST) {
       await mail.send(new VerificationEmail(this.email, subject, otp, template))

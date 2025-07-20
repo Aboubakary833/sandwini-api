@@ -7,6 +7,7 @@ export const authMessages = {
     emailNotVerified: "Votre adresse email n'a pas encore été vérifié.",
     verify: 'Un code de vérification vous a été envoyé par mail.',
     inactive: "Votre compte n'a pas encore été activé par l'administrateur.",
+    failed: "Les informations de connexion fournies ne correspondent à aucun utilisateur.",
   },
 
   logout: {

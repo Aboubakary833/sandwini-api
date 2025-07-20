@@ -7,8 +7,8 @@ export const roleMessages = {
 }
 
 export const serviceMessages = {
-	created: 'La création du service a été un succès.',
-	updated: 'La modification du service a été avec succès.',
-	deleted: 'La suppression du service a été succès.',
-	notFound: "Le service auquel vous tentez d'apporter des modifications n'existe pas.",
+	created: 'La création du dépôt a été un succès.',
+	updated: 'La modification du dépôt a été avec succès.',
+	deleted: 'La suppression du dépôt a été succès.',
+	notFound: "Le dépôt auquel vous tentez d'apporter des modifications n'existe pas.",
 }

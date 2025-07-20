@@ -3,10 +3,9 @@ import { UserFactory } from '#database/factories/user_factory'
 import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import VerificationEmail from '#mails/auth/verification_email'
 import { authMessages } from '#messages/auth'
-import { exceptionMessages } from '#messages/default'
 import { validatorMessages } from '#messages/validator'
 import User from '#models/user'
-import cache from '@adonisjs/cache/services/main'
+import CacheService from '#services/cache_service'
 import mail from '@adonisjs/mail/services/main'
 import { test } from '@japa/runner'
 import { DateTime } from 'luxon'
@@ -36,23 +35,24 @@ test.group('Login attempt', () => {
       password: '1234',
     })
 
-    response.assertStatus(400)
+    response.assertStatus(401)
     response.assertBody({
-      code: ERROR_CODES.INVALID_CREDENTIALS,
-      message: exceptionMessages.invalidCredentials,
+      code: ERROR_CODES.AUTH_FAILED,
+      message: authMessages.login.failed,
     })
   })
 
   test('Login should fail for unverified user', async ({ client, assert, cleanup }) => {
     const user = await UserFactory.merge({ password: 'Marvel@1234' }).create()
-    const { mails } = await mail.fake()
+    const { mails } = mail.fake()
     const response = await client.post('/api/v1/login').json({
       email: user.email,
       password: 'Marvel@1234',
     })
 
-    const code = await cache.namespace('otp').get<string>({ key: user.email })
-    const token = await cache.namespace('token').get<string>({ key: user.email })
+    const cache = new CacheService()
+    const code = await cache.from('otp').get<string>(user.email)
+    const token = await cache.from('token').get<string>(user.email)
 
     mails.assertQueued(VerificationEmail, (email) => {
       assert.equal(email.email, user.email)
@@ -75,8 +75,8 @@ test.group('Login attempt', () => {
     cleanup(async () => {
       mail.restore()
       await Promise.all([
-        cache.namespace('otp').delete({ key: user.email }),
-        cache.namespace('token').delete({ key: user.email }),
+        cache.from('otp').delete(user.email),
+        cache.from('token').delete(user.email),
       ])
     })
   })
@@ -115,8 +115,9 @@ test.group('Login attempt', () => {
       password: 'Marvel@1234',
     })
 
-    const code = await cache.namespace('otp').get<string>({ key: user.email })
-    const token = await cache.namespace('token').get<string>({ key: user.email })
+    const cache = new CacheService()
+    const code = await cache.from('otp').get<string>(user.email)
+    const token = await cache.from('token').get<string>(user.email)
 
     mails.assertQueued(VerificationEmail, (email) => {
       assert.equal(email.email, user.email)
@@ -138,8 +139,8 @@ test.group('Login attempt', () => {
     cleanup(async () => {
       mail.restore()
       await Promise.all([
-        cache.namespace('otp').delete({ key: user.email }),
-        cache.namespace('token').delete({ key: user.email }),
+        cache.from('otp').delete(user.email),
+        cache.from('token').delete(user.email),
       ])
     })
   })
@@ -173,8 +174,8 @@ test.group('Login 2FA verification', () => {
     }).create()
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.LOGIN)
-    const otpCacher = cache.namespace('otp')
-    await otpCacher.set({ key: user.email, value: sendOtpAction.generateOTP(), ttl: '15m' })
+    const cache = new CacheService().namespace('otp')
+    await cache.set(user.email, sendOtpAction.generateOTP(), '15m')
 
     const response = await client.post('/api/v1/login/verify').json({
       email: user.email,
@@ -188,7 +189,7 @@ test.group('Login 2FA verification', () => {
     })
 
     cleanup(async () => {
-      await otpCacher.delete({ key: user.email })
+      await cache.delete(user.email)
     })
   })
 
@@ -200,9 +201,9 @@ test.group('Login 2FA verification', () => {
     }).create()
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.LOGIN)
-    const otpCacher = cache.namespace('otp')
     const code = sendOtpAction.generateOTP()
-    await otpCacher.set({ key: user.email, value: code, ttl: '15m' })
+    const cache = new CacheService().namespace('otp')
+    await cache.set(user.email, code, '15m')
 
     const response = await client.post('/api/v1/login/verify').json({
       email: user.email,

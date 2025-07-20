@@ -4,7 +4,7 @@ import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import VerificationEmail from '#mails/auth/verification_email'
 import { authMessages } from '#messages/auth'
 import { validatorMessages } from '#messages/validator'
-import cache from '@adonisjs/cache/services/main'
+import CacheService from '#services/cache_service'
 import encryption from '@adonisjs/core/services/encryption'
 import mail from '@adonisjs/mail/services/main'
 import { test } from '@japa/runner'
@@ -45,10 +45,11 @@ test.group('Reset password request', () => {
       password: newPassword,
       password_confirmation: newPassword,
     })
+    const cache = new CacheService()
 
     const [code, cachePassword] = await Promise.all([
-      cache.namespace('otp').get<string>({ key: user.email }),
-      cache.namespace('reset_password').get<string>({ key: user.email }),
+      cache.from('otp').get<string>(user.email),
+      cache.from('reset_password').get<string>(user.email),
     ])
     const decryptedPassword = encryption.decrypt<string>(cachePassword)
 
@@ -67,14 +68,14 @@ test.group('Reset password request', () => {
 
     response.assertOk()
     response.assertBody({
-      code: ERROR_CODES.RESET_MAIL_SENT,
+      code: SUCCESS_CODES.RESET_MAIL_SENT,
       message: authMessages.resetPassword.resetMailSent,
       redirect: '/forgot_password/verify',
     })
 
     cleanup(async () => {
-      await cache.namespace('otp').delete({ key: user.email })
-      await cache.namespace('reset_password').delete({ key: user.email })
+      await cache.from('otp').delete(user.email)
+      await cache.from('reset_password').delete(user.email)
     })
   })
 })
@@ -100,8 +101,8 @@ test.group('Reset password confirmation', () => {
     const user = await UserFactory.create()
 
     const sendOtpAction = new SendOtpTo(user.email, OtpType.RESET_PASSWORD_REQUEST)
-    const otpCacher = cache.namespace('otp')
-    await otpCacher.set({ key: user.email, value: sendOtpAction.generateOTP(), ttl: '15m' })
+    const cache = new CacheService().namespace('otp')
+    await cache.set(user.email, sendOtpAction.generateOTP(), '15m')
 
     const response = await client.post('/api/v1/forgot_password/verify').json({
       email: user.email,
@@ -112,10 +113,11 @@ test.group('Reset password confirmation', () => {
     response.assertBody({
       code: ERROR_CODES.OTP_INVALID,
       message: authMessages.otp.invalid,
+      redirectTo: '/forgot_password',
     })
 
     cleanup(async () => {
-      await otpCacher.delete({ key: user.email })
+      await cache.delete(user.email)
     })
   })
 
@@ -131,10 +133,12 @@ test.group('Reset password confirmation', () => {
     const encryptedPassword = encryption.encrypt(newPassword)
     const sendOtpAction = new SendOtpTo(user.email, OtpType.RESET_PASSWORD_REQUEST)
     const code = sendOtpAction.generateOTP()
-    await cache.namespace('otp').set({ key: user.email, value: code, ttl: '15m' })
-    await cache
-      .namespace('reset_password')
-      .set({ key: user.email, value: encryptedPassword, ttl: '30m' })
+    const cache = new CacheService()
+
+    await Promise.all([
+      cache.to('otp').set(user.email, code, '15m'),
+      cache.to('reset_password').set(user.email, encryptedPassword, '30m'),
+    ])
 
     const response = await client.post('/api/v1/forgot_password/verify').json({
       email: user.email,
