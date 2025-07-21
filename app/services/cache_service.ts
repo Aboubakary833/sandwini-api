@@ -18,9 +18,9 @@ export default class CacheService {
 
   public get<T>(key: string) {
     if (this.__namespace) {
-      return this.provider.namespace(this.__namespace).get<T>({ key })
+      return this.provider.namespace(this.__namespace).get<T | null>({ key })
     }
-    return this.provider.get<T>({ key })
+    return this.provider.get<T | null>({ key })
   }
 
   public set(key: string, value: any, ttl?: Duration) {

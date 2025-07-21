@@ -15,7 +15,7 @@ export default class History extends BaseModel {
     DELETE: 'Suppression',
     EXPORT: 'Export',
     SYNC: 'Synchronisation',
-  }
+  } as const
 
   @column({ isPrimary: true })
   declare id: string

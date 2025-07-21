@@ -63,7 +63,7 @@ export default class SessionController {
   async verify({ request, response }: HttpContext, cache: CacheService) {
     const { email, otp } = await otpValidator.validate(request.all())
 
-    const cacheOtp = await cache.from('otp').get(email)
+    const cacheOtp = await cache.from('otp').get<string>(email)
     if (!cacheOtp) {
       return response.gone({
         code: ERROR_CODES.OTP_EXPIRED,
@@ -87,10 +87,11 @@ export default class SessionController {
         redirectTo: REDIRECTS.inactive,
       })
     }
-    const token = await this.authService.createAccessTokenFor(user)
+    const { token, abilities } = await this.authService.createAccessTokenFor(user)
 
     if (!token) {
       await HistoryService.log('user:login_failed', user)
+      await this.authService.deleteAccessTokenFor(user)
 
       return response.badGateway({
         code: ERROR_CODES.INTERNAL_ERROR,
@@ -108,7 +109,8 @@ export default class SessionController {
 
     return response.ok({
       code: SUCCESS_CODES.LOGIN_SUCCESS,
-      token: token,
+      token,
+      abilities,
       redirectTo: REDIRECTS.home,
     })
   }

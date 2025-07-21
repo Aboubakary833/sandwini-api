@@ -10,7 +10,7 @@ import encryption from '@adonisjs/core/services/encryption'
 export default class ResendOtpController {
   async index({ request, response }: HttpContext) {
     const { token, email } = await resendOtpValidator.validate(request.all())
-    const cacheToken = await new CacheService().from('token').get(email)
+    const cacheToken = await new CacheService().from('token').get<string>(email)
 
     if (!cacheToken) {
       return this.tokenExpired(response)

@@ -47,8 +47,14 @@ export default class RolesController {
         message: roleMessages.notFound,
       })
     }
+
+    if (Object.values(Role.DEFAULTS).includes(role.name)) {
+      return this.roleService.unauthorizedAction(response)
+    }
+
     const { name } = await updateValidator(role.id).validate(request.all())
     const user = auth.user as User
+
     role.name = name
     await Promise.all([role.save(), HistoryService.log('role:edited', user, { role: name })])
 
@@ -66,6 +72,11 @@ export default class RolesController {
         message: roleMessages.notFound,
       })
     }
+
+    if (Object.values(Role.DEFAULTS).includes(role.name)) {
+      return this.roleService.unauthorizedAction(response)
+    }
+
     await Promise.all([
       HistoryService.log('role:deleted', auth.user as User, { role: role.name }),
       role.delete(),

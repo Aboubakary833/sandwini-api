@@ -9,13 +9,13 @@ export default class Expense extends BaseModel {
     LOGISTICS: 'Logistique',
     STAFF: 'Staff',
     STOCK: 'Stock',
-  }
+  } as const
 
   static STATUS = {
     APPROVED: 'Approuvée',
     IN_PROGRESS: 'En cours',
     REJECTED: 'Rejété',
-  }
+  } as const
 
   @column({ isPrimary: true })
   declare id: string

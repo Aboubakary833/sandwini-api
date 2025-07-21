@@ -41,7 +41,7 @@ export default class RegisterController {
   @inject()
   async verify({ request, response }: HttpContext, cache: CacheService) {
     const { email, otp } = await otpValidator.validate(request.all())
-    const cacheOtp = await cache.from('otp').get(email)
+    const cacheOtp = await cache.from('otp').get<string>(email)
 
     if (!cacheOtp) {
       return response.gone({

@@ -22,8 +22,6 @@ export default class SendOtpTo {
   }
 
   async handle() {
-    await this.cache.deleteIfExists(this.email)
-
     const subject = authMessages.otpMailSubject[this.type]
     const otp = this.generateOTP()
     const template = `emails/otp/${this.type}`

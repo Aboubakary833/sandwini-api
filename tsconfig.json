@@ -11,6 +11,7 @@
       "#actions/*": ["./app/actions/*.ts"],
       "#rules/*": ["./app/rules/*.ts"],
       "#messages/*": ["./resources/messages/*.ts"],
+      "#constants/*": ["./app/constants/*.ts"],
     }
   }
 }
