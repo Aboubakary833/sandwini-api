@@ -109,5 +109,9 @@ export default defineConfig({
       pattern: 'resources/lang/**/*.{json,yaml,yml}',
       reloadServer: false,
     },
+    {
+      pattern: 'public/logo.png',
+      reloadServer: false,
+    }
   ],
 })
