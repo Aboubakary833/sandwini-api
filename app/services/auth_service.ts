@@ -2,10 +2,10 @@ import CreateResendOtpToken from '#actions/create_resend_opt_token'
 import SendOtpTo, { OtpType } from '#actions/send_otp_to'
 import User from '#models/user'
 import { HttpContext } from '@adonisjs/core/http'
-import HistoryService from './history_service.ts'
+import HistoryService from './history_service.js'
 import { ERROR_CODES } from '#enums/status_codes'
 import { authMessages } from '#messages/auth'
-import CacheService from './cache_service.ts'
+import CacheService from './cache_service.js'
 import Role from '#models/role'
 
 export default class AuthService {

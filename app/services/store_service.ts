@@ -1,6 +1,6 @@
 import { HttpContext } from '@adonisjs/core/http'
 import Service from '#models/service'
-import BaseFilterService from './base_filter_service.ts'
+import BaseFilterService from './base_filter_service.js'
 
 export default class StoreService extends BaseFilterService {
   protected status: boolean | undefined

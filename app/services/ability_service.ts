@@ -1,6 +1,6 @@
 import Permission from '#models/permission'
 import Role from '#models/role'
-import CacheService from './cache_service.ts'
+import CacheService from './cache_service.js'
 
 export default class AbilityService {
   protected cache: CacheService

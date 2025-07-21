@@ -1,6 +1,6 @@
 import { HttpContext } from '@adonisjs/core/http'
 import Role from '#models/role'
-import BaseFilterService from './base_filter_service.ts'
+import BaseFilterService from './base_filter_service.js'
 import { ERROR_CODES } from '#enums/status_codes'
 import { roleMessages } from '#messages/admin'
 

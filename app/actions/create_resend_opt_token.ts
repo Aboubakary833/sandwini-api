@@ -1,5 +1,5 @@
 import CachService from '#services/cache_service'
-import { OtpType } from './send_otp_to.ts'
+import { OtpType } from './send_otp_to.js'
 import encryption from '@adonisjs/core/services/encryption'
 
 export type ResendOtpTokenPayload = {

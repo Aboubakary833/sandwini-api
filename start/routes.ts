@@ -1,8 +1,8 @@
 import router from '@adonisjs/core/services/router'
 import authRoutes from './routes/auth.js'
-import { apiThrottle } from './limiter.ts'
-import { middleware } from './kernel.ts'
-import adminRoutes from './routes/admin.ts'
+import { apiThrottle } from './limiter.js'
+import { middleware } from './kernel.js'
+import adminRoutes from './routes/admin.js'
 
 router
   .group(() => {

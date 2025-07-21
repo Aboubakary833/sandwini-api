@@ -4,8 +4,6 @@
     "rootDir": "./",
     "outDir": "./build",
     "lib": ["esnext"],
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
     "paths": {
       "#utils/*": ["./app/utils/*.ts"],
       "#actions/*": ["./app/actions/*.ts"],
