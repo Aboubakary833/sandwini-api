@@ -35,7 +35,9 @@
     "#messages/*": "./resources/messages/*.js",
     "#enums/*": "./app/enums/*.js",
     "#utils/*": "./app/utils/*.js",
-    "#constants/*": "./app/constants/*.js"
+    "#constants/*": "./app/constants/*.js",
+    "#jobs/*": "./app/jobs/*.js",
+    "#decorators": "./app/decorators/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",
@@ -58,7 +60,6 @@
   },
   "dependencies": {
     "@adonisjs/auth": "^9.4.0",
-    "@adonisjs/bouncer": "^3.1.6",
     "@adonisjs/cache": "^1.2.0",
     "@adonisjs/core": "^6.18.0",
     "@adonisjs/cors": "^2.2.1",
@@ -66,6 +67,7 @@
     "@adonisjs/lucid": "^21.6.1",
     "@adonisjs/mail": "^9.2.2",
     "@adonisjs/redis": "^9.2.0",
+    "@rlanz/bull-queue": "^3.1.0",
     "@vinejs/vine": "^3.0.1",
     "edge.js": "^6.2.1",
     "luxon": "^3.7.1",

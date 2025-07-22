@@ -10,6 +10,8 @@
       "#rules/*": ["./app/rules/*.ts"],
       "#messages/*": ["./resources/messages/*.ts"],
       "#constants/*": ["./app/constants/*.ts"],
+      "#jobs/*": ["./app/jobs/*.ts"],
+      "#decorators/*": ["./app/decorators/*.js"]
     }
   }
 }

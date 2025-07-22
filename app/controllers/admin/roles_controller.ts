@@ -1,4 +1,7 @@
+import abilities from '#constants/permissions'
+import authorize from '#decorators/authorize'
 import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
+import BulkSetRolePermissionJob from '#jobs/bulk_set_role_permission_job'
 import { roleMessages } from '#messages/admin'
 import Role from '#models/role'
 import User from '#models/user'
@@ -7,6 +10,7 @@ import RoleService from '#services/role_service'
 import { storeValidator, updateValidator } from '#validators/roles'
 import { inject } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
+import queue from '@rlanz/bull-queue/services/main'
 
 @inject()
 export default class RolesController {
@@ -20,17 +24,20 @@ export default class RolesController {
     }
   }
 
+  @authorize(abilities.ROLE_LIST)
   async index() {
     const roles = await this.roleService.fetch()
 
     return roles.toJSON()
   }
 
+  @authorize(abilities.ROLE_CREATE)
   async store({ auth, request, response }: HttpContext) {
-    const { name } = await storeValidator.validate(request.all())
+    const { name, permissions } = await storeValidator.validate(request.all())
     const role = await Role.create({ name })
     const user = auth.user as User
 
+    queue.dispatch(BulkSetRolePermissionJob, { role, permissions })
     await HistoryService.log('role:created', user, { role: role.name })
 
     return response.ok({
@@ -39,6 +46,7 @@ export default class RolesController {
     })
   }
 
+  @authorize(abilities.ROLE_UPDATE)
   async update({ auth, params, request, response }: HttpContext) {
     const role = await Role.find(params.id)
     if (!role) {
@@ -52,11 +60,12 @@ export default class RolesController {
       return this.roleService.unauthorizedAction(response)
     }
 
-    const { name } = await updateValidator(role.id).validate(request.all())
+    const { name, permissions } = await updateValidator(role.id).validate(request.all())
     const user = auth.user as User
 
     role.name = name
     await Promise.all([role.save(), HistoryService.log('role:edited', user, { role: name })])
+    queue.dispatch(BulkSetRolePermissionJob, { role, permissions })
 
     return response.ok({
       code: SUCCESS_CODES.ROLE_UPDATED,
@@ -64,6 +73,7 @@ export default class RolesController {
     })
   }
 
+  @authorize(abilities.ROLE_DELETE)
   async destroy({ auth, params, response }: HttpContext) {
     const role = await Role.find(params.id ?? '')
     if (!role) {

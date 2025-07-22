@@ -1,9 +1,8 @@
-const permissions = {
+const abilities = {
   ROLE_LIST: 'roles:listing',
   ROLE_CREATE: 'roles:ajout',
   ROLE_UPDATE: 'role:modification',
   ROLE_DELETE: 'role:suppression',
-  ROLE_GRANT_PERMISSION: 'attribution_de_permissions',
 
   SERVICE_LIST: 'dépôts:listing',
   SERVICE_CREATE: 'dépôts:ajout',
@@ -16,6 +15,19 @@ const permissions = {
   USER_DELETE: 'utilisateurs:suppression',
 } as const
 
-export type PermissionType = (typeof permissions)[keyof typeof permissions]
+export type PermissionType = (typeof abilities)[keyof typeof abilities]
 
-export default permissions
+const DIRECTOR_EXCEPTS = ['roles']
+const MANAGER_EXCEPTS = [...DIRECTOR_EXCEPTS]
+
+export const allAbilities = Object.values(abilities) as PermissionType[]
+export const directorAbilities = allAbilities.map((name) => {
+  const namespace = name.split(':')[0]
+  return !DIRECTOR_EXCEPTS.includes(namespace)
+})
+export const managerAbilities = allAbilities.map((name) => {
+  const namespace = name.split(':')[0]
+  return !MANAGER_EXCEPTS.includes(namespace)
+})
+
+export default abilities

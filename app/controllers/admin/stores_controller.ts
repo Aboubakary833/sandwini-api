@@ -1,3 +1,5 @@
+import abilities from '#constants/permissions'
+import authorize from '#decorators/authorize'
 import { ERROR_CODES, SUCCESS_CODES } from '#enums/status_codes'
 import { serviceMessages } from '#messages/admin'
 import Service from '#models/service'
@@ -14,18 +16,15 @@ export default class StoreController {
     protected storeService: StoreService,
     protected historyService: HistoryService
   ) {}
-  /**
-   * Display a list of resource
-   */
+
+  @authorize(abilities.SERVICE_LIST)
   async index() {
     const services = await this.storeService.fetch()
 
     return services.toJSON()
   }
 
-  /**
-   * Handle form submission for the create action
-   */
+  @authorize(abilities.SERVICE_CREATE)
   async store({ auth, request, response }: HttpContext) {
     const formData = await createValidator.validate(request.all())
     const service = await Service.create(formData)
@@ -39,9 +38,7 @@ export default class StoreController {
     })
   }
 
-  /**
-   * Handle form submission for the edit action
-   */
+  @authorize(abilities.SERVICE_UPDATE)
   async update({ auth, request, params, response }: HttpContext) {
     const service = await Service.find(params.id)
     if (!service) {
@@ -63,9 +60,8 @@ export default class StoreController {
       message: serviceMessages.updated,
     })
   }
-  /**
-   * Delete record
-   */
+
+  @authorize(abilities.SERVICE_DELETE)
   async destroy({ auth, params, response }: HttpContext) {
     const service = await Service.find(params.id)
     if (!service) {

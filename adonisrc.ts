@@ -30,7 +30,7 @@ export default defineConfig({
     () => import('@adonisjs/lucid/commands'),
     () => import('@adonisjs/mail/commands'),
     () => import('@adonisjs/cache/commands'),
-    () => import('@adonisjs/bouncer/commands'),
+    () => import('@rlanz/bull-queue/commands'),
   ],
 
   /*
@@ -58,7 +58,7 @@ export default defineConfig({
     () => import('@adonisjs/core/providers/edge_provider'),
     () => import('@adonisjs/redis/redis_provider'),
     () => import('@adonisjs/limiter/limiter_provider'),
-    () => import('@adonisjs/bouncer/bouncer_provider'),
+    () => import('@rlanz/bull-queue/queue_provider'),
   ],
 
   /*
@@ -112,6 +112,6 @@ export default defineConfig({
     {
       pattern: 'public/logo.png',
       reloadServer: false,
-    }
+    },
   ],
 })

@@ -6,7 +6,7 @@ export default class AbilityService {
   protected cache: CacheService
 
   constructor() {
-    this.cache = new CacheService().namespace('permissions')
+    this.cache = new CacheService().namespace('abilities')
   }
 
   /**
@@ -33,6 +33,7 @@ export default class AbilityService {
   }
 
   async getRoleAbilities(role: Role) {
+    await role.load('permissions')
     let abilities = await this.cache.get<string[]>(role.id)
     if (!abilities) {
       abilities = role.permissions.map((p) => p.name)

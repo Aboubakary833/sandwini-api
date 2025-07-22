@@ -7,10 +7,12 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.uuid('role_id').unsigned().notNullable().references('roles.id').onDelete('CASCADE')
-      table.uuid('permission_id').unsigned().notNullable().references('permissions.id').onDelete('CASCADE')
-
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
+      table
+        .uuid('permission_id')
+        .unsigned()
+        .notNullable()
+        .references('permissions.id')
+        .onDelete('CASCADE')
     })
   }
 
