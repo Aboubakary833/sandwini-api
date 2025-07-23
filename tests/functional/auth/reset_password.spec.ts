@@ -5,13 +5,14 @@ import VerificationEmail from '#mails/auth/verification_email'
 import { authMessages } from '#messages/auth'
 import { validatorMessages } from '#messages/validator'
 import CacheService from '#services/cache_service'
+import { BASE_PATH } from '#tests/global'
 import encryption from '@adonisjs/core/services/encryption'
 import mail from '@adonisjs/mail/services/main'
 import { test } from '@japa/runner'
 
 test.group('Reset password request', () => {
   test('Reset request should fail and return validation error', async ({ client }) => {
-    const response = await client.post('/api/v1/forgot_password').json({
+    const response = await client.post(`${BASE_PATH}/forgot_password`).json({
       email: 'johndoe@gmail.com',
       password: 'J@hnWicked1234',
       password_confirmation: '',
@@ -40,7 +41,7 @@ test.group('Reset password request', () => {
     const user = await UserFactory.create()
     const newPassword = 'J@hnWicked1234'
     const { mails } = mail.fake()
-    const response = await client.post('/api/v1/forgot_password').json({
+    const response = await client.post(`${BASE_PATH}/forgot_password`).json({
       email: user.email,
       password: newPassword,
       password_confirmation: newPassword,
@@ -84,7 +85,7 @@ test.group('Reset password confirmation', () => {
   test('Verification should fail and return OTP expired message', async ({ client }) => {
     const user = await UserFactory.create()
 
-    const response = await client.post('/api/v1/forgot_password/verify').json({
+    const response = await client.post(`${BASE_PATH}/forgot_password/verify`).json({
       email: user.email,
       otp: '123456',
     })
@@ -104,7 +105,7 @@ test.group('Reset password confirmation', () => {
     const cache = new CacheService().namespace('otp')
     await cache.set(user.email, sendOtpAction.generateOTP(), '15m')
 
-    const response = await client.post('/api/v1/forgot_password/verify').json({
+    const response = await client.post(`${BASE_PATH}/forgot_password/verify`).json({
       email: user.email,
       otp: '123456',
     })
@@ -140,7 +141,7 @@ test.group('Reset password confirmation', () => {
       cache.to('reset_password').set(user.email, encryptedPassword, '30m'),
     ])
 
-    const response = await client.post('/api/v1/forgot_password/verify').json({
+    const response = await client.post(`${BASE_PATH}/forgot_password/verify`).json({
       email: user.email,
       otp: code,
     })

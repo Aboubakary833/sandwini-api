@@ -37,7 +37,7 @@
     "#utils/*": "./app/utils/*.js",
     "#constants/*": "./app/constants/*.js",
     "#jobs/*": "./app/jobs/*.js",
-    "#decorators": "./app/decorators/*.js"
+    "#decorators/*": "./app/decorators/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.8.2",

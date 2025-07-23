@@ -2,7 +2,7 @@ import { HttpContext } from '@adonisjs/core/http'
 import { PermissionType } from '#constants/permissions'
 import { ERROR_CODES } from '#enums/status_codes'
 
-const DEFAULT_MESSAGE = "Vous n'êtes pas autorisé à éffectuer cette action."
+export const FORBIDDEN_MESSAGE = "Vous n'êtes pas autorisé à éffectuer cette action."
 
 /**
  * authorize is an ability check decorator. It check if the current authenticated user
@@ -13,18 +13,17 @@ export default function authorize(ability: PermissionType, message?: string) {
     const originalMethod = descriptor.value
 
     descriptor.value = async function (...args: any[]) {
-      const result = await originalMethod.apply(this, args)
       const { auth, response } = args[0] as HttpContext
       const user = auth.user
 
       if (!user?.currentAccessToken?.allows(ability)) {
         return response.forbidden({
           code: ERROR_CODES.FORBIDDEN,
-          message: message ?? DEFAULT_MESSAGE,
+          message: message ?? FORBIDDEN_MESSAGE,
         })
       }
 
-      return result
+      return await originalMethod.apply(this, args)
     }
 
     return descriptor

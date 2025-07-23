@@ -6,13 +6,14 @@ import { authMessages } from '#messages/auth'
 import { validatorMessages } from '#messages/validator'
 import User from '#models/user'
 import CacheService from '#services/cache_service'
+import { BASE_PATH } from '#tests/global'
 import mail from '@adonisjs/mail/services/main'
 import { test } from '@japa/runner'
 import { DateTime } from 'luxon'
 
 test.group('Login attempt', () => {
   test('Login should fail and return validation errors', async ({ client }) => {
-    const response = await client.post('api/v1/login').json({
+    const response = await client.post(`${BASE_PATH}/login`).json({
       email: 'jonathan.com',
       password: '1234',
     })
@@ -30,7 +31,7 @@ test.group('Login attempt', () => {
   })
 
   test('Login should fail and return invalid credential errors', async ({ client }) => {
-    const response = await client.post('api/v1/login').json({
+    const response = await client.post(`${BASE_PATH}/login`).json({
       email: 'jonathan@gmail.com',
       password: '1234',
     })
@@ -45,7 +46,7 @@ test.group('Login attempt', () => {
   test('Login should fail for unverified user', async ({ client, assert, cleanup }) => {
     const user = await UserFactory.merge({ password: 'Marvel@1234' }).create()
     const { mails } = mail.fake()
-    const response = await client.post('/api/v1/login').json({
+    const response = await client.post(`${BASE_PATH}/login`).json({
       email: user.email,
       password: 'Marvel@1234',
     })
@@ -86,7 +87,7 @@ test.group('Login attempt', () => {
       emailVerifiedAt: DateTime.now(),
       password: 'Marvel@1234',
     }).create()
-    const response = await client.post('/api/v1/login').json({
+    const response = await client.post(`${BASE_PATH}/login`).json({
       email: user.email,
       password: 'Marvel@1234',
     })
@@ -110,7 +111,7 @@ test.group('Login attempt', () => {
       active: true,
     }).create()
     const { mails } = mail.fake()
-    const response = await client.post('/api/v1/login').json({
+    const response = await client.post(`${BASE_PATH}/login`).json({
       email: user.email,
       password: 'Marvel@1234',
     })
@@ -154,7 +155,7 @@ test.group('Login 2FA verification', () => {
       active: true,
     }).create()
 
-    const response = await client.post('/api/v1/login/verify').json({
+    const response = await client.post(`${BASE_PATH}/login/verify`).json({
       email: user.email,
       otp: '123456',
     })
@@ -177,7 +178,7 @@ test.group('Login 2FA verification', () => {
     const cache = new CacheService().namespace('otp')
     await cache.set(user.email, sendOtpAction.generateOTP(), '15m')
 
-    const response = await client.post('/api/v1/login/verify').json({
+    const response = await client.post(`${BASE_PATH}/login/verify`).json({
       email: user.email,
       otp: '123456',
     })
@@ -205,7 +206,7 @@ test.group('Login 2FA verification', () => {
     const cache = new CacheService().namespace('otp')
     await cache.set(user.email, code, '15m')
 
-    const response = await client.post('/api/v1/login/verify').json({
+    const response = await client.post(`${BASE_PATH}/login/verify`).json({
       email: user.email,
       otp: code,
     })
@@ -226,7 +227,7 @@ test.group('Déconnexion', () => {
       active: true,
     }).create()
 
-    const response = await client.post('/api/v1/logout').loginAs(user)
+    const response = await client.post(`${BASE_PATH}/logout`).loginAs(user)
     const tokens = await User.accessTokens.all(user)
 
     response.assertOk()

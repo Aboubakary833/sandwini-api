@@ -18,7 +18,7 @@ const abilities = {
 export type PermissionType = (typeof abilities)[keyof typeof abilities]
 
 const DIRECTOR_EXCEPTS = ['roles']
-const MANAGER_EXCEPTS = [...DIRECTOR_EXCEPTS]
+const MANAGER_EXCEPTS = ['dépôts', ...DIRECTOR_EXCEPTS]
 
 export const allAbilities = Object.values(abilities) as PermissionType[]
 export const directorAbilities = allAbilities.map((name) => {

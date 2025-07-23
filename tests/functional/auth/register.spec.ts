@@ -5,12 +5,13 @@ import VerificationEmail from '#mails/auth/verification_email'
 import { authMessages } from '#messages/auth'
 import { validatorMessages } from '#messages/validator'
 import CacheService from '#services/cache_service'
+import { BASE_PATH } from '#tests/global'
 import mail from '@adonisjs/mail/services/main'
 import { test } from '@japa/runner'
 
 test.group('Registration', () => {
   test('Registration should fail and return validator errors', async ({ client }) => {
-    const response = await client.post('/api/v1/register').json({
+    const response = await client.post(`${BASE_PATH}/register`).json({
       name: 'John Doe',
       email: 'johndoe@gmail.com',
       password: '1234',
@@ -35,10 +36,11 @@ test.group('Registration', () => {
   test('Registration should succeed and send email verification message', async ({
     client,
     assert,
+    cleanup,
   }) => {
     const { mails } = mail.fake()
     const email = 'johndoe@gmail.com'
-    const response = await client.post('/api/v1/register').json({
+    const response = await client.post(`${BASE_PATH}/register`).json({
       name: 'John Doe',
       email,
       password: 'John@wicked14',
@@ -65,6 +67,11 @@ test.group('Registration', () => {
       resendOTPtoken: token,
       redirectTo: '/register/verify',
     })
+
+    cleanup(async () => {
+      mail.restore()
+      await Promise.all([cache.from('otp').delete(email), cache.from('token').delete(email)])
+    })
   })
 })
 
@@ -72,7 +79,7 @@ test.group('Email verification', () => {
   test('Verification should fail and return OTP expired message', async ({ client }) => {
     const user = await UserFactory.create()
 
-    const response = await client.post('/api/v1/register/verify').json({
+    const response = await client.post(`${BASE_PATH}/register/verify`).json({
       email: user.email,
       otp: '123456',
     })
@@ -91,7 +98,7 @@ test.group('Email verification', () => {
     const cache = new CacheService().namespace('otp')
     await cache.set(user.email, sendOtpAction.generateOTP(), '15m')
 
-    const response = await client.post('/api/v1/register/verify').json({
+    const response = await client.post(`${BASE_PATH}/register/verify`).json({
       email: user.email,
       otp: '123456',
     })
@@ -116,7 +123,7 @@ test.group('Email verification', () => {
     const code = sendOtpAction.generateOTP()
     await new CacheService().to('otp').set(user.email, code, '15m')
 
-    const response = await client.post('/api/v1/register/verify').json({
+    const response = await client.post(`${BASE_PATH}/register/verify`).json({
       email: user.email,
       otp: code,
     })

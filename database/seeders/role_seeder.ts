@@ -1,9 +1,8 @@
 import Role from '#models/role'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import BulkSetRolePermissionJob from '#jobs/bulk_set_role_permission_job'
-import queue from '@rlanz/bull-queue/services/main'
 import Permission from '#models/permission'
 import { directorAbilities, managerAbilities } from '#constants/permissions'
+import AbilityService from '#services/ability_service'
 
 const getAllPermissions = async () => Permission.query().select('id', 'name')
 
@@ -36,7 +35,7 @@ export default class extends BaseSeeder {
           permissions = await getManagerPermissions()
       }
 
-      queue.dispatch(BulkSetRolePermissionJob, { role, permissions })
+      new AbilityService().grantManyPermissions(role, permissions)
     })
   }
 }
